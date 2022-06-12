@@ -22,7 +22,7 @@ func isValidType(w http.ResponseWriter, r *http.Request, expectedType string) bo
 	return true
 }
 
-func generateToken(w http.ResponseWriter, r *http.Request, userID int64) error {
+func generateToken(w http.ResponseWriter, userID int64) error {
 	claims := map[string]interface{}{"userId": userID}
 
 	jwtauth.SetIssuedAt(claims, time.Now())
@@ -74,7 +74,7 @@ func (s *server) userLogin() http.HandlerFunc {
 			}
 		}
 
-		err = generateToken(w, r, userID)
+		err = generateToken(w, userID)
 		if err != nil {
 			log.Debug().AnErr("login: encode token", err)
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
@@ -112,7 +112,7 @@ func (s *server) userRegister() http.HandlerFunc {
 			}
 		}
 
-		err = generateToken(w, r, userID)
+		err = generateToken(w, userID)
 		if err != nil {
 			log.Debug().AnErr("register: encode token", err)
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
