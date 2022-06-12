@@ -56,14 +56,14 @@ func (s *server) userLogin() http.HandlerFunc {
 		user := domain.UserModel{}
 		err := json.NewDecoder(r.Body).Decode(&user)
 		if err != nil {
-			log.Debug().AnErr("userLogin: decode request", err)
+			log.Error().AnErr("decode request", err).Msg("userLogin")
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
 
 		userID, err := user.Login(s.db)
 		if err != nil {
-			log.Debug().AnErr("userLogin: login", err)
+			log.Error().AnErr("login", err).Msg("userLogin")
 			switch errors.Is(err, repo.ErrNotExists) {
 			case true:
 				http.Error(w, http.StatusText(http.StatusUnauthorized), http.StatusUnauthorized)
@@ -76,7 +76,7 @@ func (s *server) userLogin() http.HandlerFunc {
 
 		err = generateToken(w, userID)
 		if err != nil {
-			log.Debug().AnErr("login: encode token", err)
+			log.Error().AnErr("encode token", err).Msg("userLogin")
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
@@ -94,14 +94,14 @@ func (s *server) userRegister() http.HandlerFunc {
 		user := domain.UserModel{}
 		err := json.NewDecoder(r.Body).Decode(&user)
 		if err != nil {
-			log.Debug().AnErr("userRegister: decode body", err)
+			log.Error().AnErr("decode body", err).Msg("userRegister")
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
 
 		userID, err := user.Register(s.db)
 		if err != nil {
-			log.Debug().AnErr("userRegister: register", err)
+			log.Error().AnErr("register", err).Msg("userRegister")
 			switch errors.Is(err, repo.ErrAlreadyExists) {
 			case true:
 				http.Error(w, http.StatusText(http.StatusConflict), http.StatusConflict)
@@ -114,7 +114,7 @@ func (s *server) userRegister() http.HandlerFunc {
 
 		err = generateToken(w, userID)
 		if err != nil {
-			log.Debug().AnErr("register: encode token", err)
+			log.Error().AnErr("encode token", err).Msg("userRegister")
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
@@ -127,14 +127,14 @@ func (s *server) userBalance() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		_, claims, err := jwtauth.FromContext(r.Context())
 		if err != nil {
-			log.Debug().AnErr("userBalance: jwt form context", err)
+			log.Error().AnErr("jwt form context", err).Msg("userBalance")
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
 
 		userID, ok := claims["userId"].(float64)
 		if !ok {
-			log.Debug().AnErr("userBalance: not valid claims", err)
+			log.Error().AnErr("not valid claims", err).Msg("userBalance")
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
@@ -143,7 +143,7 @@ func (s *server) userBalance() http.HandlerFunc {
 
 		balance, err := user.GetBalance(s.db)
 		if err != nil {
-			log.Debug().AnErr("userBalance: get balance", err)
+			log.Error().AnErr("get balance", err).Msg("userBalance")
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
@@ -151,7 +151,7 @@ func (s *server) userBalance() http.HandlerFunc {
 		w.Header().Set("Content-Type", "application/json")
 		err = json.NewEncoder(w).Encode(&balance)
 		if err != nil {
-			log.Debug().AnErr("userBalance: encoding response", err)
+			log.Error().AnErr("encoding response", err).Msg("userBalance")
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}

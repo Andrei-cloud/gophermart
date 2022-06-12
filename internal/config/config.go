@@ -30,7 +30,7 @@ func GetConfig() *Config {
 		flag.Parse()
 		cfg = Config{}
 		if err := env.Parse(&cfg); err != nil {
-			log.Fatal().AnErr("init", err)
+			log.Fatal().AnErr("env.Parse", err).Msg("GetConfig")
 		}
 		if cfg.Address == "" {
 			cfg.Address = *addressPtr

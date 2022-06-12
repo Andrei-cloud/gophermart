@@ -50,7 +50,7 @@ func (w *worker) Run(ctx context.Context) {
 func (w *worker) GetJob(ch chan<- string) {
 	orders, err := w.db.OrderToProcess()
 	if err != nil {
-		log.Debug().AnErr("GetJob: OrderToProcess", err)
+		log.Error().AnErr("OrderToProcess", err).Msg("GetJob")
 		return
 	}
 	//log.Debug().Msgf("GetJob: got %d order for processing", len(orders))

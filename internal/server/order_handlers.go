@@ -35,7 +35,7 @@ func (s *server) userAddOrder() http.HandlerFunc {
 		order := domain.OrderModel{}
 		b, err := ioutil.ReadAll(r.Body)
 		if err != nil {
-			log.Debug().AnErr("userAddOrder: reading body", err)
+			log.Error().AnErr("reading body", err).Msg("userAddOrder")
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
@@ -43,7 +43,7 @@ func (s *server) userAddOrder() http.HandlerFunc {
 
 		order.Number = string(b)
 		if !utils.IsValidLuhn(order.Number) {
-			log.Debug().AnErr("userAddOrder: isvalid luhn number", fmt.Errorf("invalid luhn"))
+			log.Error().AnErr("isvalid luhn number", fmt.Errorf("invalid luhn")).Msg("userAddOrder")
 			http.Error(w, http.StatusText(http.StatusUnprocessableEntity), http.StatusUnprocessableEntity)
 			return
 		}
@@ -52,7 +52,7 @@ func (s *server) userAddOrder() http.HandlerFunc {
 
 		err = order.Register(s.db)
 		if err != nil {
-			log.Debug().AnErr("userAddOrder: register", err)
+			log.Error().AnErr("register", err).Msg("userAddOrder")
 			if errors.Is(err, domain.ErrDontMatch) {
 				http.Error(w, http.StatusText(http.StatusConflict), http.StatusConflict)
 				return
@@ -87,7 +87,7 @@ func (s *server) userOrderList() http.HandlerFunc {
 		}
 		list, err := order.CreditList(s.db)
 		if err != nil {
-			log.Debug().AnErr("userOrderList: credit list", err)
+			log.Error().AnErr("credit list", err).Msg("userOrderList")
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
@@ -97,7 +97,7 @@ func (s *server) userOrderList() http.HandlerFunc {
 			w.Header().Set("Content-Type", "application/json")
 			err = json.NewEncoder(w).Encode(&list)
 			if err != nil {
-				log.Debug().AnErr("userOrderList: encoding response", err)
+				log.Error().AnErr("encoding response", err).Msg("userOrderList")
 				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 				return
 			}
@@ -133,14 +133,14 @@ func (s *server) userWithdraw() http.HandlerFunc {
 
 		err = json.NewDecoder(r.Body).Decode(&request)
 		if err != nil {
-			log.Debug().AnErr("userWithdraw: decoding request body", err)
+			log.Error().AnErr("decoding request body", err).Msg("userWithdraw")
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
 		defer r.Body.Close()
 
 		if !utils.IsValidLuhn(request.Order) {
-			log.Debug().AnErr("userWithdraw: isvalid luhn number", fmt.Errorf("invalid luhn"))
+			log.Error().AnErr("isvalid luhn number", fmt.Errorf("invalid luhn")).Msg("userWithdraw")
 			http.Error(w, http.StatusText(http.StatusUnprocessableEntity), http.StatusUnprocessableEntity)
 			return
 		}
@@ -153,7 +153,7 @@ func (s *server) userWithdraw() http.HandlerFunc {
 
 		err = order.Withdraw(s.db)
 		if err != nil {
-			log.Debug().AnErr("userWithdraw: withdraw", err)
+			log.Error().AnErr("withdraw", err).Msg("userWithdraw")
 			if errors.Is(err, domain.ErrIsufficientFunds) {
 				http.Error(w, http.StatusText(http.StatusPaymentRequired), http.StatusPaymentRequired)
 				return
@@ -190,7 +190,7 @@ func (s *server) userWithdrawalList() http.HandlerFunc {
 
 		list, err := order.DebitList(s.db)
 		if err != nil {
-			log.Debug().AnErr("userWithdrawalList: debit list", err)
+			log.Error().AnErr("debit list", err).Msg("userWithdrawalList")
 			http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 			return
 		}
@@ -200,7 +200,7 @@ func (s *server) userWithdrawalList() http.HandlerFunc {
 			w.Header().Set("Content-Type", "application/json")
 			err = json.NewEncoder(w).Encode(&list)
 			if err != nil {
-				log.Debug().AnErr("userWithdrawalList: encoding response", err)
+				log.Error().AnErr("encoding response", err).Msg("userWithdrawalList")
 				http.Error(w, http.StatusText(http.StatusInternalServerError), http.StatusInternalServerError)
 				return
 			}

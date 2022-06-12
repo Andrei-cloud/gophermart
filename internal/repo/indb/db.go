@@ -22,18 +22,18 @@ type dbRepo struct {
 func NewDB(dsn string) *dbRepo {
 	db, err := sql.Open("pgx", dsn)
 	if err != nil {
-		log.Fatal().AnErr("NewDB", err)
+		log.Fatal().AnErr("sql.Open", err).Msg("NewDB")
 		os.Exit(1)
 	}
 	ctx, cancel := context.WithTimeout(context.Background(), 10*time.Second)
 	defer cancel()
 	if err := db.PingContext(ctx); err != nil {
-		log.Fatal().AnErr("NewDB", err)
+		log.Fatal().AnErr("db.PingContext", err).Msg("NewDB")
 		os.Exit(1)
 	}
 	log.Debug().Msg("create schema if not already exists")
 	if err := createTables(ctx, db); err != nil {
-		log.Fatal().AnErr("NewDB", err)
+		log.Fatal().AnErr("db.PingContext", err).Msg("NewDB")
 		os.Exit(1)
 	}
 	return &dbRepo{db: db}
