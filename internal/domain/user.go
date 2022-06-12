@@ -1,9 +1,10 @@
 package domain
 
 import (
+	"fmt"
+
 	"github.com/andrei-cloud/gophermart/internal/repo"
 	"github.com/andrei-cloud/gophermart/pkg/utils"
-	"github.com/pkg/errors"
 )
 
 type User interface {
@@ -26,7 +27,7 @@ func (u *UserModel) Register(r repo.Repository) (int64, error) {
 	}
 	id, err := r.UserCreate(&repo.User{Username: u.Username, Password: u.Password})
 	if err != nil {
-		return 0, errors.Wrap(err, "register user failed")
+		return 0, fmt.Errorf("register user failed: %w", err)
 	}
 	return id, nil
 }
@@ -47,7 +48,7 @@ func (u *UserModel) Login(r repo.Repository) (int64, error) {
 func (u *UserModel) GetBalance(r repo.Repository) (map[string]float64, error) {
 	user, err := r.UserGetByID(u.ID)
 	if err != nil {
-		return nil, errors.Wrap(err, "get by id user failed")
+		return nil, fmt.Errorf("get by id user failed: %w", err)
 	}
 
 	return map[string]float64{"current": user.Balance, "withdrawn": user.Withdrawal}, nil
