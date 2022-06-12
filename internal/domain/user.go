@@ -4,7 +4,7 @@ import (
 	"fmt"
 
 	"github.com/andrei-cloud/gophermart/internal/repo"
-	"github.com/andrei-cloud/gophermart/pkg/utils"
+	"golang.org/x/crypto/bcrypt"
 )
 
 type User interface {
@@ -21,7 +21,7 @@ type UserModel struct {
 
 func (u *UserModel) Register(r repo.Repository) (int64, error) {
 	var err error
-	u.Password, err = utils.HashPassword(u.Password)
+	err = u.hashPassword()
 	if err != nil {
 		return 0, err
 	}
@@ -38,7 +38,7 @@ func (u *UserModel) Login(r repo.Repository) (int64, error) {
 		return 0, repo.ErrNotExists
 	}
 
-	if !utils.CheckPasswordHash(u.Password, user.Password) {
+	if !u.checkPasswordHash(user.Password) {
 		return 0, repo.ErrNotExists
 	}
 
@@ -52,4 +52,15 @@ func (u *UserModel) GetBalance(r repo.Repository) (map[string]float64, error) {
 	}
 
 	return map[string]float64{"current": user.Balance, "withdrawn": user.Withdrawal}, nil
+}
+
+func (u *UserModel) hashPassword() error {
+	bytes, err := bcrypt.GenerateFromPassword([]byte(u.Password), 8)
+	u.Password = string(bytes)
+	return err
+}
+
+func (u *UserModel) checkPasswordHash(hash string) bool {
+	err := bcrypt.CompareHashAndPassword([]byte(hash), []byte(u.Password))
+	return err == nil
 }
