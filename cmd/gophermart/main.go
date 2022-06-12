@@ -19,13 +19,14 @@ import (
 )
 
 func main() {
+	cfg := config.GetConfig()
 	var (
 		db  repo.Repository
 		err error
 	)
 
 	zerolog.SetGlobalLevel(zerolog.InfoLevel)
-	if config.Cfg.Debug {
+	if cfg.Debug {
 		zerolog.SetGlobalLevel(zerolog.DebugLevel)
 		log.Debug().Msg("DEBUG LEVEL IS ENABLED")
 
@@ -33,13 +34,13 @@ func main() {
 
 	log.Info().Msg("Starting...")
 
-	if config.Cfg.DBURI == "" {
+	if cfg.DBURI == "" {
 		db = inmem.NewInMemRepo()
 	} else {
-		db = indb.NewDB(config.Cfg.DBURI)
+		db = indb.NewDB(cfg.DBURI)
 	}
 
-	s := server.NewServer(&config.Cfg)
+	s := server.NewServer(cfg)
 
 	s.WithDB(db).SetupRoutes()
 
@@ -70,7 +71,7 @@ func main() {
 	}()
 
 	// launch worker
-	wrkr := worker.NewWorker(config.Cfg.AccrualSystem, db)
+	wrkr := worker.NewWorker(cfg.AccrualSystem, db)
 
 	go wrkr.Run(serverCtx)
 

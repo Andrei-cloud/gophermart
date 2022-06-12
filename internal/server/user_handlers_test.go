@@ -88,7 +88,7 @@ func Test_server_User(t *testing.T) {
 	}
 
 	db := repo.NewInMemRepo()
-	s := NewServer(&config.Cfg)
+	s := NewServer(config.GetConfig())
 	s.WithDB(db).SetupRoutes()
 
 	for _, tt := range tests {
