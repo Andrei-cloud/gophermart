@@ -22,7 +22,7 @@ func NewWorker(addr string, db repo.Repository) *worker {
 
 func (w *worker) Run(ctx context.Context) {
 	ticker := time.NewTicker(10 * time.Second)
-	ordersChan := make(chan string, 5)
+	ordersChan := make(chan string)
 	done := make(chan struct{})
 	defer close(ordersChan)
 
